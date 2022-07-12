@@ -30,4 +30,38 @@ class FlaskTests(TestCase):
         
         db.session.rollback()
 
+    def test_user_list(self):
+        with app.test_client() as client:
+            resp = client.get("/users")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Testy', html)
+    
+    def test_user_detail(self):
+        with app.test_client() as client:
+            resp = client.get(f"/users/{self.user_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<h1>Testy McTestface</h1>', html)
+
+    def test_add_user(self):
+        with app.test_client() as client:
+            d = {"first_name": "Testy2", "last_name": "McTestface2", "image_url": "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/close-up-of-cat-wearing-sunglasses-while-sitting-royalty-free-image-1571755145.jpg"}
+            resp = client.post("/users/new", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Testy2", html)
+
+    def test_edit_user(self):
+        with app.test_client() as client:
+            d = {"first_name": "Testy3", "last_name": "McTestface3", "image_url": "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/close-up-of-cat-wearing-sunglasses-while-sitting-royalty-free-image-1571755145.jpg"}
+            resp = client.post("/users/new", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Testy3", html)
+
     
