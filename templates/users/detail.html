@@ -19,8 +19,25 @@
 
     <form>
         <button class="btn btn-primary" formaction="/users/{{user.id}}/edit" formmethod="GET">Edit</button>
-        <button class="btn btn-danger formaction="/users/{{user.id}}/delete" formmethod="POST">Delete</button>
+        <button class="btn btn-danger" formaction="/users/{{user.id}}/delete" formmethod="POST">Delete</button>
     </form>
+
+    <br>
+
+    <h2>Posts</h2>
+
+    {% if user.posts %}
+        <li>
+        {% for post in user.posts %}
+            <ul>{{ user.post_id.title }}</ul>
+        {% endfor %}
+        </li>
+
+    {% else %}
+        <p> No posts yet!</p>
+    {% endif %}
+    
+    <p><a href="/users/{{user.id}}/posts/new" class="btn btn-primary">Add Post</a></p> 
 
 </div>
 </div>
