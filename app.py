@@ -101,11 +101,15 @@ def delete_user(user_id):
     return redirect("/users")
 
 
+
+
+############ Blog Post Routes
+
 @app.route("/users/<int:user_id>/posts/new", methods=["GET"])
 def new_post(user_id):
     """Render new post form"""
-    user = User.query.get_or_404(user_id)
 
+    user = User.query.get_or_404(user_id)
     return render_template("/users/new-post.html", user=user)
 
 
@@ -113,20 +117,17 @@ def new_post(user_id):
 def new_post_submit(user_id):
     """Handle new post submit, redirect to user detail page"""
 
+    user = User.query.get_or_404(user_id)
     new_post = Post(
             title = request.form['title'],
             content = request.form['content'],
-            user_id = user.user_id)
+            author = user_id)
 
     db.session.add(new_post)
     db.session.commit()
 
-    return redirect ("/users/<int:user_id>")
+    return redirect (f"/users/{user_id}")
 
-
-
-
-############ Blog Post Routes
 
 @app.route("/posts/<int:post_id>")
 def show_post(post_id):
@@ -149,8 +150,8 @@ def edit_post_submit(post_id):
     """Handle edit post form submit, redirect to post detail"""
 
     post = Post.query.get_or_404(post_id)
-    title = request.form['title'],
-    content = request.form['content']
+    post.title = request.form['title'],
+    post.content = request.form['content']
 
     db.session.add(post)
     db.session.commit()
@@ -163,6 +164,7 @@ def delete_post(post_id):
     """Delete post"""
 
     post = Post.query.get_or_404(post_id)
+
     db.session.delete(post)
     db.session.commit()
 
