@@ -4,11 +4,11 @@
 
 {% block content %}
 
-<h1 class="display-1">{{ post.title }}</h1>
+<h1 class="display-3">{{ post.title }}</h1>
 
 <div>
     <p>{{ post.content }}</p>
-    <p class="font-italic text-muted">By {{ post.user_id }} on {{post.readable_date}}</p>
+    <p class="font-italic text-muted">By {{ post.user.full_name }} on {{post.readable_date}}</p>
 </div>
 
 <form>
@@ -24,7 +24,7 @@
         >Delete</button>
     <button 
         class="btn btn-secondary" 
-        formaction="/users/{{post.user_id}}" 
+        formaction="/users/{{post.author}}" 
         formmethod="GET"
         >Back</button>
 </form>

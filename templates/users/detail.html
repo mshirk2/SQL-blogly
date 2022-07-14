@@ -13,10 +13,10 @@
 
     </div>
 
-    <div class="col-sm-4 col-6">
+    <div class="col-6">
 
-        <h1 class="display-1">{{user.full_name}}</h1>
-
+        <h1 class="display-3">{{user.full_name}}</h1>
+        <br>
         <form>
             <button 
                 class="btn btn-primary" 
@@ -29,9 +29,7 @@
                 formmethod="POST"
                 >Delete</button>
         </form>
-
         <br>
-
         <h2>Posts</h2>
 
         {% if user.posts %}
