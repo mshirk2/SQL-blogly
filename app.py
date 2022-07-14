@@ -155,7 +155,7 @@ def edit_post_submit(post_id):
     db.session.add(post)
     db.session.commit()
 
-    return redirect ("/posts/<int:post_id>")
+    return redirect (f"/posts/{post_id}")
 
 
 @app.route("/posts/<int:post_id>/delete", methods=["POST"])
