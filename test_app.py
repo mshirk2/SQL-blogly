@@ -1,7 +1,7 @@
 from unittest import TestCase
 from app import app
 from flask import session
-from models import db, User, Post
+from models import db, User, Post, Tag, PostTag
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_test'
 app.config['SQLALCHEMY_ECHO'] = False
@@ -11,50 +11,32 @@ app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 db.drop_all()
 db.create_all()
 
-# Some sample profile image URLs
+# Sample profile image URLs
 USER_IMG = "https://cdn.cnn.com/cnnnext/dam/assets/160322031153-london-boat-name-boaty-mcboatface-roth-pkg-00003107-full-169.jpg"
 USER_IMG2 = "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/close-up-of-cat-wearing-sunglasses-while-sitting-royalty-free-image-1571755145.jpg"
 
 
-class FlaskTests(TestCase):
-    """Tests for user navigation"""
+
+class UserAppTests(TestCase):
+    """Tests for user app routes"""
 
     def setUp(self):
-        """Add testing data"""
+        """Add sample user"""
 
-        # User.query.delete()
-        # Post.query.delete()
-
-        ########### Set up user
-
-        user = User(
-            first_name="Testy", 
-            last_name="McTestface", 
-            image_url=USER_IMG)
+        user = User(first_name="Testy", last_name="McTestface", image_url=USER_IMG)
 
         db.session.add(user)
         db.session.commit()
 
-
-        ########### Set up post
-        post = Post(
-            title="Fabulous Test Title", 
-            content="Fabulous Test Content", 
-            author=user.id)
-        
-        db.session.add(post)
-        db.session.commit()
-
         self.user_id = user.id
-        self.post_id = post.id
 
 
     def tearDown(self):
         """Clean up any fouled transaction"""
         
-        db.session.rollback()
+        db.drop_all()
+        db.create_all()
 
-    ######################### User tests
 
     def test_user_list(self):
         with app.test_client() as client:
@@ -94,7 +76,33 @@ class FlaskTests(TestCase):
             self.assertIn("Testy3", html)
 
 
-    ####################### Post tests
+
+class PostAppTests(TestCase):
+    """Tests for blogpost app routes"""
+
+    def setUp(self):
+        """Add sample blogpost"""
+        
+        user = User(first_name="Testy", last_name="McTestface", image_url=USER_IMG)
+
+        db.session.add(user)
+        db.session.commit()
+
+        post = Post(title="Fabulous Test Title", content="Fabulous Test Content", author=user.id)
+
+        db.session.add(post)
+        db.session.commit()
+
+        self.user_id = user.id
+        self.post_id = post.id
+
+
+    def tearDown(self):
+        """Clean up any fouled transaction"""
+        
+        db.drop_all()
+        db.create_all()
+
 
     def test_post_detail(self):
         with app.test_client() as client:
@@ -124,4 +132,51 @@ class FlaskTests(TestCase):
             self.assertNotIn("Fabulous Test Title", html)
 
 
-    
+
+class TagAppTests(TestCase):
+    """Tests for tag app routes"""
+
+    def setUp(self):
+        """Add sample tag"""
+
+        tag = Tag(name="test tag")
+
+        db.session.add(tag)
+        db.session.commit()
+
+        self.tag_id = tag.id
+
+
+    def tearDown(self):
+        """Clean up any fouled transaction"""
+        
+        db.drop_all()
+        db.create_all()   
+
+
+    def test_tag_detail(self):
+        with app.test_client() as client:
+            resp = client.get(f"/tags/{self.tag_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('test tag', html)
+
+
+    def test_add_tag(self):
+        with app.test_client() as client:
+            d = {"name": "testingtagthesecond"}
+            resp = client.post(f"/tags/new", data=d, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("testingtagthesecond", html)
+
+
+    def test_delete_tag(self):
+        with app.test_client() as client:
+            resp = client.post(f"tags/{self.tag_id}/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertNotIn("test tag", html)     

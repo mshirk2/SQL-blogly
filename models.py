@@ -6,6 +6,13 @@ db = SQLAlchemy()
 DEFAULT_IMG = "https://www.nicepng.com/png/detail/128-1280406_view-user-icon-png-user-circle-icon-png.png"
 
 
+def connect_db(app):
+    """Connect to database."""
+
+    db.app = app
+    db.init_app(app)
+
+
 class User(db.Model):
     """User"""
 
@@ -46,14 +53,39 @@ class Post(db.Model):
         db.ForeignKey('users.id'), 
         nullable=False)
 
+    tagged = db.relationship('PostTag', backref="posts", cascade="all, delete")
+
     @property
     def readable_date(self):
         """Return readable datetime"""
 
         return self.timestamp.strftime("%a %b %-d %Y at %I:%M %p")
 
-def connect_db(app):
-    """Connect to database."""
 
-    db.app = app
-    db.init_app(app)
+class Tag(db.Model):
+    """Tag that can be added to posts"""
+
+    __tablename__ = "tags"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.Text, nullable=False, unique=True)
+
+    posts = db.relationship('Post', secondary="post_tags", backref="tags")
+
+
+class PostTag(db.Model):
+    """Tag on a post"""
+
+    __tablename__ = "post_tags"
+
+    post_id = db.Column(
+        db.Integer, 
+        db.ForeignKey('posts.id'), 
+        primary_key=True, 
+        nullable=False)
+    tag_id = db.Column(
+        db.Integer, 
+        db.ForeignKey('tags.id'), 
+        primary_key=True, 
+        nullable=False)
+
